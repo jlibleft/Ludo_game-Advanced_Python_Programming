@@ -1,4 +1,5 @@
+"""Player model reserved for a later development stage."""
+
+
 class Player:
-    '''
-    TODO: Logika gracza, pionków i ruchów
-    '''
+    """Placeholder for player identity and owned pawns."""

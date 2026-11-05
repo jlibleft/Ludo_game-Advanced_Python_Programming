@@ -1,4 +1,5 @@
+"""Domain board definition reserved for a later development stage."""
+
+
 class Board:
-    '''
-    TODO: Definicja planszy, pól i tras
-    '''
+    """Placeholder for board cells and routes, independent of rendering."""

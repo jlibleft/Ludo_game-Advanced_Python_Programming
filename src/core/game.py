@@ -1,4 +1,5 @@
+"""Game engine boundary reserved for a later development stage."""
+
+
 class Game:
-    '''
-    TODO: Główny stan gry i pętla sterująca
-    '''
+    """Placeholder for game orchestration; Qt owns the desktop event loop."""
