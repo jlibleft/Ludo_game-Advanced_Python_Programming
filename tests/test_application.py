@@ -10,13 +10,14 @@ from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QApplication, QSizePolicy
 import pytest
 
+from src.config import APP_CONFIG
 from src.gui.main_window import MainWindow
 
 
 def test_window_defaults_and_close(application: QApplication) -> None:
     window = MainWindow()
     try:
-        assert window.windowTitle() == "Ludo - Chińczyk"
+        assert window.windowTitle() == APP_CONFIG.title
         assert window.size() == QSize(1100, 800)
         assert window.minimumSize().width() < window.maximumSize().width()
         assert window.minimumSize().height() < window.maximumSize().height()
