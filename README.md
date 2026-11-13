@@ -34,32 +34,32 @@ python main.py
 
 ```text
 .
-├── main.py                 # Repository launcher
-├── pyproject.toml          # Metadata, dependencies, packaging, pytest config
+├── pyproject.toml        # Metadata, dependencies, packaging, pytest config
 ├── requirements.txt        # Editable install with development dependencies
 ├── README.md
 ├── .gitignore
 ├── src/
-│   ├── __init__.py
-│   ├── main.py             # Startup, window lifetime, Qt event loop
-│   ├── application.py      # QApplication creation and application styling
-│   ├── config.py           # Qt-independent application configuration
-│   ├── core/
-│   │   ├── __init__.py
-│   │   ├── board.py        # Logical routes, safe squares, move destinations
-│   │   ├── dice.py         # Dice with an injectable random source
-│   │   ├── exceptions.py   # Domain errors for invalid operations
-│   │   ├── game.py         # GameEngine and legacy Game alias
-│   │   ├── pawn.py         # Immutable pawn identity and logical progress
-│   │   ├── player.py       # Colors, starting offsets, and pawn ownership
-│   │   └── state.py        # Validated immutable game snapshot
-│   ├── gui/
-│   │   ├── __init__.py
-│   │   ├── main_window.py  # Window and layout
-│   │   ├── board_widget.py # QPainter board surface
-│   │   └── styles.py       # Shared Qt stylesheet
-│   └── ai/
-│       └── __init__.py     # Reserved for future opponents
+│   └── Ludo/               # Main module
+│       ├── __init__.py
+│       ├── main.py             # Startup, window lifetime, Qt event loop
+│       ├── application.py      # QApplication creation and application styling
+│       ├── config.py           # Qt-independent application configuration
+│       ├── core/
+│       │   ├── __init__.py
+│       │   ├── board.py        # Logical routes, safe squares, move destinations
+│       │   ├── dice.py         # Dice with an injectable random source
+│       │   ├── exceptions.py   # Domain errors for invalid operations
+│       │   ├── game.py         # GameEngine and legacy Game alias
+│       │   ├── pawn.py         # Immutable pawn identity and logical progress
+│       │   ├── player.py       # Colors, starting offsets, and pawn ownership
+│       │   └── state.py        # Validated immutable game snapshot
+│       ├── gui/
+│       │   ├── __init__.py
+│       │   ├── main_window.py  # Window and layout
+│       │   ├── board_widget.py # QPainter board surface
+│       │   └── styles.py       # Shared Qt stylesheet
+│       └── ai/
+│           └── __init__.py     # Reserved for future opponents
 ├── assets/
 │   ├── images/.gitkeep
 │   ├── sounds/.gitkeep
@@ -69,10 +69,7 @@ python main.py
 │   ├── test_application.py
 │   ├── test_dice.py
 │   ├── test_engine.py
-│   └── test_models.py
-├── Dockerfile            
-├── docker-compose.yml     
-└── .dockerignore          
+│   └── test_models.py        
 ```
 
 ## Game engine
