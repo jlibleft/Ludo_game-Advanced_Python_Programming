@@ -2,8 +2,8 @@
 
 from dataclasses import dataclass
 
-from src.core.board import Board
-from src.core.exceptions import InvalidSetupError
+from Ludo.core.board import Board
+from Ludo.core.exceptions import InvalidSetupError
 
 
 @dataclass(frozen=True, slots=True)

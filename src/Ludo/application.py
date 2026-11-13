@@ -4,8 +4,8 @@ from collections.abc import Sequence
 
 from PySide6.QtWidgets import QApplication
 
-from src.config import APP_CONFIG
-from src.gui.styles import APPLICATION_STYLE
+from Ludo.config import APP_CONFIG
+from Ludo.gui.styles import APPLICATION_STYLE
 
 
 def create_application(argv: Sequence[str]) -> QApplication:

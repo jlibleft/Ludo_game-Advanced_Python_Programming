@@ -3,21 +3,22 @@
 from collections.abc import Sequence
 from dataclasses import replace
 
-from src.core.board import Board
-from src.core.dice import Dice
-from src.core.exceptions import (
+from Ludo.core.board import Board
+from Ludo.core.dice import Dice
+from Ludo.core.exceptions import (
     GameOverError,
     InvalidMoveError,
     InvalidSetupError,
     InvalidTurnError,
 )
-from src.core.pawn import Pawn
-from src.core.player import Player, PlayerColor
-from src.core.state import GameState
+from Ludo.core.pawn import Pawn
+from Ludo.core.player import Player, PlayerColor
+from Ludo.core.state import GameState
 
 
 class GameEngine:
     """Own a game snapshot and accept only valid roll/move operations."""
+    MAX_DICE = 6
 
     def __init__(
         self,
@@ -165,7 +166,7 @@ class GameEngine:
         )
 
     def _next_player_index(self, roll: int) -> int:
-        if roll == 6:
+        if roll == self.MAX_DICE:
             return self._state.active_player_index
         return (self._state.active_player_index + 1) % len(self._state.players)
 

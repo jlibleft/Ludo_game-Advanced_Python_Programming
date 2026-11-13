@@ -3,9 +3,9 @@
 from dataclasses import dataclass, field
 from enum import Enum
 
-from src.core.board import Board
-from src.core.exceptions import InvalidSetupError
-from src.core.pawn import Pawn
+from Ludo.core.board import Board
+from Ludo.core.exceptions import InvalidSetupError
+from Ludo.core.pawn import Pawn
 
 
 class PlayerColor(str, Enum):

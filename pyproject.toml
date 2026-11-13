@@ -15,11 +15,8 @@ dev = ["pytest>=8.4.1,<10"]
 build = ["pyinstaller>=6.11,<7"]
 
 [project.scripts]
-ludo = "src.main:main"
+ludo = "Ludo.main:main"
 
 [tool.setuptools.packages.find]
-include = ["src", "src.*"]
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-addopts = "-ra"
+where = ["src"]
+include = ["Ludo", "Ludo.*"]

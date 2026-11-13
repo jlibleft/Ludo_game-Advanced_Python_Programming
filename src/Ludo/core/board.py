@@ -1,6 +1,6 @@
 """Logical routes and move destinations, independent of board rendering."""
 
-from src.core.exceptions import InvalidMoveError, InvalidRollError
+from Ludo.core.exceptions import InvalidMoveError, InvalidRollError
 
 
 class Board:
@@ -13,6 +13,8 @@ class Board:
     START_OFFSETS = (0, 13, 26, 39)
     SAFE_SQUARES = frozenset(START_OFFSETS)
     PAWNS_PER_PLAYER = 4
+    MIN_DICE = 1
+    MAX_DICE = 6
 
     @classmethod
     def validate_progress(cls, progress: int) -> None:
@@ -23,7 +25,7 @@ class Board:
     @staticmethod
     def validate_roll(value: int) -> None:
         """Reject invalid dice values, including bools masquerading as ints."""
-        if type(value) is not int or not 1 <= value <= 6:
+        if type(value) is not int or not Board.MIN_DICE <= value <= Board.MAX_DICE:
             raise InvalidRollError("Dice results must be integers in 1..6.")
 
     @classmethod
@@ -47,7 +49,7 @@ class Board:
         cls.validate_progress(progress)
         cls.validate_roll(roll)
         if progress == cls.BASE:
-            return 0 if roll == 6 else None
+            return 0 if roll == cls.MAX_DICE else None
         if progress == cls.FINISH or progress + roll > cls.FINISH:
             return None
         return progress + roll

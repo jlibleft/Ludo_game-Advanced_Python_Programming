@@ -3,7 +3,7 @@
 import random
 from typing import Protocol
 
-from src.core.board import Board
+from Ludo.core.board import Board
 
 
 class RandomSource(Protocol):

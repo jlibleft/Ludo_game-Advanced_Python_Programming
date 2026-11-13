@@ -3,8 +3,8 @@
 import sys
 from collections.abc import Sequence
 
-from src.application import create_application
-from src.gui.main_window import MainWindow
+from Ludo.application import create_application
+from Ludo.gui.main_window import MainWindow
 
 
 def main(argv: Sequence[str] | None = None) -> int:
