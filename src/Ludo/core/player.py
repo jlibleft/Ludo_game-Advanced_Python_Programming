@@ -29,6 +29,7 @@ class Player:
     )
 
     def __post_init__(self) -> None:
+        """Validate the color and four ordered pawn IDs."""
         if not isinstance(self.color, PlayerColor):
             raise InvalidSetupError("Player color must be a PlayerColor.")
         if (
@@ -41,8 +42,18 @@ class Player:
 
     @property
     def starting_offset(self) -> int:
+        """Locate this color's fixed starting square on the shared track.
+
+        Returns:
+            The color offset: red 0, blue 13, green 26, or yellow 39.
+        """
         return Board.START_OFFSETS[tuple(PlayerColor).index(self.color)]
 
     @property
     def has_won(self) -> bool:
+        """Check whether every pawn has reached the finish.
+
+        Returns:
+            True when all four pawns are finished; otherwise False.
+        """
         return all(pawn.finished for pawn in self.pawns)

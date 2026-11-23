@@ -7,35 +7,111 @@ of the GUI.
 
 ## Requirements and installation
 
-Use **Python 3.11 or newer** with pip and virtual environment support.
-The runtime uses PySide6 (Qt 6); tests use pytest. Dependencies and Python
-constraints are declared in `pyproject.toml`. `requirements.txt` installs the
-project in editable mode with its development dependencies from that source.
+Use **Python 3.11 or newer** and [uv](https://docs.astral.sh/uv/getting-started/installation/).
+The runtime uses PySide6 (Qt 6); development tools are pytest and Ruff.
+Dependencies and tool settings are declared in `pyproject.toml`. The committed
+`uv.lock` records exact dependency versions for reproducible environments.
 
-On Linux/macOS, from the repository root:
+From the repository root, on Linux, macOS, or Windows:
 
 ```bash
-python3.11 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-python main.py
+uv sync --locked
+uv run --locked python tools/configure_cache.py
+uv run --locked ludo
 ```
 
-On Windows (PowerShell):
+`uv sync` creates `.venv`, installs the project in editable mode, and includes
+the `dev` dependency group containing pytest and Ruff. `uv run` runs a command
+in that environment, so manual activation is unnecessary. The alternative
+application entry point is `uv run --locked python -m Ludo.main`.
 
-```powershell
-py -3.11 -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-python main.py
+The `--locked` flag rejects outdated lockfiles instead of silently changing
+them. After intentionally changing dependencies, run `uv lock` and
+`uv sync --locked`, then commit both `pyproject.toml` and `uv.lock`.
+
+## Development commands
+
+```bash
+uv run --locked pytest
+uv run --locked ruff check .
+uv run --locked ruff format --check .
 ```
+
+[Ruff](https://docs.astral.sh/ruff/configuration/) checks common Python errors
+and import ordering. It also formats code
+using double quotes, spaces, and a 79-character line length, targeting Python
+3.11. Generated files under `.cache` are excluded.
+
+Apply supported lint fixes and formatting with:
+
+```bash
+uv run --locked ruff check --fix .
+uv run --locked ruff format .
+```
+
+Review automatic changes before committing. To add dependencies:
+
+```bash
+uv add package-name
+uv add --dev development-tool-name
+```
+
+These commands update the project configuration, lockfile, and environment.
+Use the Ruff extension in your editor if you want lint feedback and formatting
+on save, and select this project's `.venv` as the Python interpreter.
+
+## Generated files
+
+Generated files have one ignored home: `.cache/`.
+
+```text
+.cache/
+├── python/       # Python bytecode, with source-path subdirectories
+├── pytest/       # pytest cache
+├── pip/          # Cache for optional direct pip usage
+├── uv/           # uv download and build cache
+├── packaging/    # setuptools .egg-info metadata
+├── build/        # setuptools intermediate build files
+├── wheels/       # Wheel output when using the command below
+├── coverage/     # Coverage data and reports, if coverage is used
+└── ruff/         # Ruff cache
+```
+
+Run `uv run --locked python tools/configure_cache.py` after creating the project's
+virtual environment. It installs a small startup configuration inside it
+so subsequent Python processes automatically write bytecode to `.cache/python`.
+It also configures that environment's pip cache. It can be run again safely;
+repeat it if the environment is recreated or the checkout is moved. Restart
+any already-running Python console or debug session to pick up the setting.
+
+Select this project's `.venv` interpreter in the IDE so editor runs use the
+same configuration. A different interpreter needs its own configuration, or
+the `PYTHONPYCACHEPREFIX` environment variable pointing to `.cache/python`.
+
+The pytest, Ruff, uv, and optional coverage paths are configured in
+`pyproject.toml`. `setup.py` routes setuptools metadata and intermediate files
+into `.cache` while keeping package metadata in `pyproject.toml`. Choose an
+output directory explicitly for tools that accept one, for example:
+
+```bash
+uv build --wheel --out-dir .cache/wheels
+```
+
+The entire `.cache` directory is disposable; tools recreate what they need.
+The virtual environment remains in `.venv`, and Git/editor settings retain
+their normal locations. These are environment and project settings rather
+than disposable tool caches.
 
 ## Project structure
 
 ```text
 .
 ├── pyproject.toml        # Metadata, dependencies, packaging, pytest config
-├── requirements.txt        # Editable install with development dependencies
+├── uv.lock               # Exact dependency versions; commit this file
+├── setup.py              # Setuptools generated-file locations
+├── tools/
+│   └── configure_cache.py # One-time cache configuration for the project venv
+├── .cache/               # Generated files; ignored by Git
 ├── README.md
 ├── .gitignore
 ├── src/
@@ -118,7 +194,7 @@ pawns wins, immediately ending the game even if the winning roll was a 6.
 ## Tests
 
 ```bash
-python -m pytest
+uv run --locked pytest
 ```
 
 ## Linux environment troubleshooting

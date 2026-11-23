@@ -8,6 +8,12 @@ from Ludo.core.player import Player, PlayerColor
 from Ludo.core.state import GameState
 
 __all__ = [
-    "Board", "Dice", "Game", "GameEngine", "GameState", "Pawn", "Player",
+    "Board",
+    "Dice",
+    "Game",
+    "GameEngine",
+    "GameState",
+    "Pawn",
+    "Player",
     "PlayerColor",
 ]

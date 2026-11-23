@@ -1,7 +1,7 @@
 """QPainter surface reserved for future board rendering."""
 
 from PySide6.QtCore import QRectF, QSize, Qt
-from PySide6.QtGui import QColor, QFont, QPaintEvent, QPainter, QPen
+from PySide6.QtGui import QColor, QFont, QPainter, QPaintEvent, QPen
 from PySide6.QtWidgets import QSizePolicy, QWidget
 
 
@@ -9,6 +9,11 @@ class BoardWidget(QWidget):
     """Draw a responsive placeholder without board geometry or game rules."""
 
     def __init__(self, parent: QWidget | None = None) -> None:
+        """Initialize the expanding, accessible board drawing surface.
+
+        Args:
+            parent: The owning Qt widget, or None for a standalone widget.
+        """
         super().__init__(parent)
         self.setObjectName("boardArea")
         self.setAccessibleName("Ludo game board area")
@@ -18,10 +23,21 @@ class BoardWidget(QWidget):
         )
 
     def sizeHint(self) -> QSize:
+        """Suggest a square size to the parent layout.
+
+        Returns:
+            A QSize of 640 by 640 pixels; the layout can choose another
+            size.
+        """
         return QSize(640, 640)
 
     def paintEvent(self, event: QPaintEvent) -> None:
-        """Keep the reserved board square and centered when resizing."""
+        """Paint a centered square placeholder and its labels.
+
+        Args:
+            event: The Qt paint event requesting a redraw. The entire
+                placeholder is repainted regardless of the event region.
+        """
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         side = max(0.0, min(self.width(), self.height()) - 8.0)

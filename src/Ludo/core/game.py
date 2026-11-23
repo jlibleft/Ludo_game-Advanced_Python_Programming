@@ -18,6 +18,7 @@ from Ludo.core.state import GameState
 
 class GameEngine:
     """Own a game snapshot and accept only valid roll/move operations."""
+
     MAX_DICE = 6
 
     def __init__(
@@ -26,6 +27,14 @@ class GameEngine:
         *,
         dice: Dice | None = None,
     ) -> None:
+        """Create a fresh game with the selected player colors.
+
+        Args:
+            colors: Two to four distinct PlayerColor values or lowercase
+                color names, in turn order. Defaults to all four colors.
+            dice: The dice instance to use. Creates a Dice instance when
+                None.
+        """
         self._dice = dice if dice is not None else Dice()
         self.new_game(colors)
 
@@ -33,7 +42,16 @@ class GameEngine:
     def from_state(
         cls, state: GameState, *, dice: Dice | None = None
     ) -> "GameEngine":
-        """Start from a validated in-memory snapshot, useful for scenarios."""
+        """Create an engine from a validated in-memory snapshot.
+
+        Args:
+            state: The immutable GameState snapshot to begin with.
+            dice: The dice instance to use. Creates a Dice instance when
+                None.
+
+        Returns:
+            A new engine using the supplied snapshot and dice source.
+        """
         if not isinstance(state, GameState):
             raise InvalidSetupError("Expected a GameState snapshot.")
         colors = tuple(player.color for player in state.players)
@@ -43,21 +61,45 @@ class GameEngine:
 
     @property
     def state(self) -> GameState:
-        """Read-only snapshot; earlier snapshots remain unchanged by moves."""
+        """Expose the current game snapshot for reading.
+
+        Returns:
+            The immutable GameState; later actions do not change this
+            snapshot.
+        """
         return self._state
 
     @property
     def active_player(self) -> Player:
+        """Identify the player whose turn is active.
+
+        Returns:
+            The active Player from the current snapshot.
+        """
         return self._state.active_player
 
     @property
     def winner(self) -> Player | None:
+        """Identify the player who has won the game.
+
+        Returns:
+            The winning Player, or None while the game is unfinished.
+        """
         if self._state.winner is None:
             return None
         return self.active_player
 
     def new_game(self, colors: Sequence[PlayerColor | str]) -> GameState:
-        """Replace the roster atomically; the first listed color starts."""
+        """Replace the roster atomically; the first listed color starts.
+
+        Args:
+            colors: Two to four distinct PlayerColor values or lowercase
+                color names, in turn order.
+
+        Returns:
+            The new GameState with all pawns in base and no pending roll or
+            winner.
+        """
         if isinstance(colors, (str, bytes)):
             raise InvalidSetupError("Provide a sequence of 2 to 4 colors.")
         try:
@@ -71,12 +113,23 @@ class GameEngine:
         return state
 
     def reset(self) -> GameState:
-        """Reset the same roster to base, retaining the dice source."""
+        """Restart the same roster while retaining the dice source.
+
+        Returns:
+            The reset GameState with the first player active and all pawns
+            in base.
+        """
         colors = tuple(player.color for player in self.state.players)
         return self.new_game(colors)
 
     def roll_dice(self) -> int:
-        """Roll once; auto-pass an unplayable roll, preserving extra sixes."""
+        """Roll once and resolve automatic passes or preserved bonuses.
+
+        Returns:
+            The integer dice result from 1 to 6. Unplayable rolls
+            automatically resolve the turn; a six preserves the same
+            player.
+        """
         self._require_running()
         if self._state.pending_roll is not None:
             raise InvalidTurnError("Move a pawn before rolling again.")
@@ -92,14 +145,28 @@ class GameEngine:
         return roll
 
     def legal_moves(self) -> tuple[int, ...]:
-        """Return active player's movable pawn IDs for the pending roll."""
+        """Find active-player pawns that can use the pending roll.
+
+        Returns:
+            A tuple of legal pawn IDs. Empty when no roll is pending or the
+            game has ended.
+        """
         roll = self._state.pending_roll
         if roll is None or self._state.winner is not None:
             return ()
         return self._movable_pawns(roll)
 
     def move_pawn(self, pawn_id: int) -> GameState:
-        """Move an active pawn, capture opponents, then resolve the turn."""
+        """Move an active pawn, capture opponents, and resolve the turn.
+
+        Args:
+            pawn_id: The active player's pawn ID, from 0 to 3, selected
+                from legal_moves().
+
+        Returns:
+            The updated GameState after movement, captures, and turn or
+            victory resolution.
+        """
         self._require_running()
         roll = self._state.pending_roll
         if roll is None:
@@ -136,6 +203,18 @@ class GameEngine:
     def _players_after_capture(
         self, moved_player: Player, moved_pawn: Pawn
     ) -> tuple[Player, ...]:
+        """Build the roster after a move and any resulting captures.
+
+        Args:
+            moved_player: The active player with the selected pawn already
+                moved.
+            moved_pawn: The moved pawn at its destination.
+
+        Returns:
+            Players in their existing turn order, with all captured
+            opponent pawns returned to base. Safe and private squares cause
+            no captures.
+        """
         square = Board.shared_position(
             moved_pawn.progress, moved_player.starting_offset
         )
@@ -146,31 +225,55 @@ class GameEngine:
             elif square is None or square in Board.SAFE_SQUARES:
                 players.append(player)
             else:
-                players.append(replace(
-                    player,
-                    pawns=tuple(
-                        replace(pawn, progress=Board.BASE)
-                        if Board.shared_position(
-                            pawn.progress, player.starting_offset
-                        ) == square
-                        else pawn
-                        for pawn in player.pawns
-                    ),
-                ))
+                players.append(
+                    replace(
+                        player,
+                        pawns=tuple(
+                            replace(pawn, progress=Board.BASE)
+                            if Board.shared_position(
+                                pawn.progress, player.starting_offset
+                            )
+                            == square
+                            else pawn
+                            for pawn in player.pawns
+                        ),
+                    )
+                )
         return tuple(players)
 
     def _movable_pawns(self, roll: int) -> tuple[int, ...]:
+        """Find active-player pawns with a legal destination for a roll.
+
+        Args:
+            roll: The validated dice result from 1 to 6.
+
+        Returns:
+            A tuple of movable pawn IDs, or an empty tuple if none can
+            move.
+        """
         return tuple(
-            pawn.id for pawn in self.active_player.pawns
+            pawn.id
+            for pawn in self.active_player.pawns
             if Board.destination(pawn.progress, roll) is not None
         )
 
     def _next_player_index(self, roll: int) -> int:
+        """Determine who acts after the current roll is resolved.
+
+        Args:
+            roll: The dice result used to determine whether a bonus roll
+                applies.
+
+        Returns:
+            The current player index for a six; otherwise the next index,
+            wrapping to the first player when necessary.
+        """
         if roll == self.MAX_DICE:
             return self._state.active_player_index
         return (self._state.active_player_index + 1) % len(self._state.players)
 
     def _require_running(self) -> None:
+        """Reject an action when the current game already has a winner."""
         if self._state.winner is not None:
             raise GameOverError("The game has ended; reset or start again.")
 

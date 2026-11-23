@@ -5,11 +5,12 @@ from unittest.mock import Mock
 
 import pytest
 
-from src.core import Dice
-from src.core.exceptions import InvalidRollError
+from Ludo.core import Dice
+from Ludo.core.exceptions import InvalidRollError
 
 
 def test_seeded_random_sources_produce_reproducible_valid_rolls() -> None:
+    """Verify that matching seeds produce identical valid dice sequences."""
     dice = Dice(random.Random(42))
     duplicate = Dice(random.Random(42))
     rolls = [dice.roll() for _ in range(100)]
@@ -18,6 +19,7 @@ def test_seeded_random_sources_produce_reproducible_valid_rolls() -> None:
 
 
 def test_dice_uses_inclusive_bounds_from_the_injected_source() -> None:
+    """Verify that Dice requests inclusive bounds from its random source."""
     source = Mock()
     source.randint.side_effect = [6, 1, 4]
     dice = Dice(source)
@@ -28,6 +30,12 @@ def test_dice_uses_inclusive_bounds_from_the_injected_source() -> None:
 
 @pytest.mark.parametrize("value", [0, 7, -1, True, 6.0, "6", None])
 def test_invalid_random_source_results_are_rejected(value: object) -> None:
+    """Verify that an invalid random-source result raises an error.
+
+    Args:
+        value: A parametrized result outside the accepted integer range
+            1..6.
+    """
     source = Mock()
     source.randint.return_value = value
     with pytest.raises(InvalidRollError):

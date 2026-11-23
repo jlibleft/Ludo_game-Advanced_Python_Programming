@@ -12,9 +12,14 @@ if TYPE_CHECKING:
 
 @pytest.fixture(scope="session")
 def application() -> Iterator["QApplication"]:
-    """Share the single QApplication required by all widget tests."""
+    """Share one offscreen QApplication and clean up after GUI tests.
+
+    Yields:
+        The QApplication used by GUI tests for the current test
+        session.
+    """
     os.environ["QT_QPA_PLATFORM"] = "offscreen"
-    from src.application import create_application
+    from Ludo.application import create_application
 
     app = create_application(["ludo-tests"])
     yield app

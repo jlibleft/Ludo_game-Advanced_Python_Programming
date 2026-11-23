@@ -1,1 +1,1 @@
-"""Qt widgets and presentation; game rules belong in src.core."""
+"""Qt widgets and presentation; game rules belong in Ludo.core."""

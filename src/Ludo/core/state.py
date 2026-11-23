@@ -21,6 +21,7 @@ class GameState:
     MAX_PLAYERS: ClassVar[int] = 4
 
     def __post_init__(self) -> None:
+        """Validate the roster, turn phase, winner, and board occupancy."""
         self._validate_player_count()
         self._validate_active_player_index()
         self._validate_player_colors()
@@ -30,16 +31,25 @@ class GameState:
 
     @property
     def active_player(self) -> Player:
+        """Find the player selected by the active-player index.
+
+        Returns:
+            The Player whose turn is active in this snapshot.
+        """
         return self.players[self.active_player_index]
 
     @property
     def winners(self) -> tuple[PlayerColor, ...]:
-        return tuple(
-            player.color for player in self.players if player.has_won
-        )
+        """Find players whose four pawns have all finished.
+
+        Returns:
+            A tuple of finished player colors in roster order; empty before
+            any player has finished all four pawns.
+        """
+        return tuple(player.color for player in self.players if player.has_won)
 
     def _validate_occupancy(self) -> None:
-        """Opponents can share a track square only when that square is safe."""
+        """Reject opponents sharing an unsafe shared-track square."""
         occupants: dict[int, PlayerColor] = {}
         for player in self.players:
             for pawn in player.pawns:
@@ -55,7 +65,7 @@ class GameState:
                 occupants[square] = player.color
 
     def _validate_player_count(self) -> None:
-        """The game requires 2 to 4 players."""
+        """Require an immutable roster containing two to four Players."""
         if (
             not isinstance(self.players, tuple)
             or not self.MIN_PLAYERS <= len(self.players) <= self.MAX_PLAYERS
@@ -64,17 +74,19 @@ class GameState:
             raise InvalidSetupError("A game needs a tuple of 2 to 4 players.")
 
     def _validate_active_player_index(self) -> None:
-        if (
-            type(self.active_player_index) is not int
-            or not 0 <= self.active_player_index < len(self.players)
-        ):
+        """Require an integer index identifying a player in the roster."""
+        if type(
+            self.active_player_index
+        ) is not int or not 0 <= self.active_player_index < len(self.players):
             raise InvalidSetupError("The active player index is invalid.")
 
     def _validate_player_colors(self) -> None:
+        """Reject repeated player colors in the roster."""
         if len({player.color for player in self.players}) != len(self.players):
             raise InvalidSetupError("Players must have distinct colors.")
 
     def _validate_pending_roll(self) -> None:
+        """Require any pending roll to be valid and playable."""
         if self.pending_roll is not None:
             Board.validate_roll(self.pending_roll)
             if not any(
@@ -84,6 +96,12 @@ class GameState:
                 raise InvalidSetupError("A pending roll needs a legal move.")
 
     def _validate_winner_state(self, winners: tuple[PlayerColor, ...]) -> None:
+        """Check that finished players and the turn agree with the winner.
+
+        Args:
+            winners: Colors of players with four finished pawns, in roster
+                order.
+        """
         if self.winner is None:
             if winners:
                 raise InvalidSetupError("Finished players need a winner flag.")

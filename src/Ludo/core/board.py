@@ -18,21 +18,43 @@ class Board:
 
     @classmethod
     def validate_progress(cls, progress: int) -> None:
-        """Reject positions outside the single logical progress range."""
+        """Reject positions outside the logical pawn progress range.
+
+        Args:
+            progress: Player-relative position: -1 for base, 0..51 for
+                track, 52..56 for home stretch, or 57 for finish.
+        """
         if type(progress) is not int or not cls.BASE <= progress <= cls.FINISH:
             raise InvalidMoveError("Pawn progress must be an integer -1..57.")
 
     @staticmethod
     def validate_roll(value: int) -> None:
-        """Reject invalid dice values, including bools masquerading as ints."""
-        if type(value) is not int or not Board.MIN_DICE <= value <= Board.MAX_DICE:
+        """Reject dice values outside the integer range 1..6.
+
+        Args:
+            value: Dice result to validate; bool values are not accepted.
+        """
+        if (
+            type(value) is not int
+            or not Board.MIN_DICE <= value <= Board.MAX_DICE
+        ):
             raise InvalidRollError("Dice results must be integers in 1..6.")
 
     @classmethod
     def shared_position(
         cls, progress: int, starting_offset: int
     ) -> int | None:
-        """Return an absolute track square, or None off the shared track."""
+        """Translate player-relative progress to a shared-track square.
+
+        Args:
+            progress: Logical pawn position from -1 to 57.
+            starting_offset: The player's fixed starting square: 0, 13, 26,
+                or 39.
+
+        Returns:
+            The absolute square in 0..51, or None for base, home stretch,
+            or finish.
+        """
         cls.validate_progress(progress)
         if (
             type(starting_offset) is not int
@@ -45,7 +67,16 @@ class Board:
 
     @classmethod
     def destination(cls, progress: int, roll: int) -> int | None:
-        """Return a legal destination, or None when this pawn cannot move."""
+        """Calculate the destination permitted by a dice roll.
+
+        Args:
+            progress: The pawn's current logical position from -1 to 57.
+            roll: An integer dice result from 1 to 6.
+
+        Returns:
+            The new logical position, or None if the pawn cannot move. A
+            six releases a base pawn to position 0.
+        """
         cls.validate_progress(progress)
         cls.validate_roll(roll)
         if progress == cls.BASE:

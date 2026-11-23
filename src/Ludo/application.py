@@ -9,7 +9,15 @@ from Ludo.gui.styles import APPLICATION_STYLE
 
 
 def create_application(argv: Sequence[str]) -> QApplication:
-    """Create and configure the process's single QApplication instance."""
+    """Create and configure the process's single QApplication.
+
+    Args:
+        argv: Command-line arguments passed to Qt, including the
+            program name.
+
+    Returns:
+        The configured QApplication, ready for widget construction.
+    """
     application = QApplication(list(argv))
     application.setApplicationName(APP_CONFIG.title)
     application.setOrganizationName("Ludo Desktop")

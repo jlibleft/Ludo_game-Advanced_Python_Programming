@@ -1,20 +1,26 @@
 """Check the desktop shell and real entry-point lifecycle."""
 
 import os
-from pathlib import Path
 import subprocess
 import sys
+from pathlib import Path
 
+import pytest
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QApplication, QSizePolicy
-import pytest
 
-from src.config import APP_CONFIG
-from src.gui.main_window import MainWindow
+from Ludo.config import APP_CONFIG
+from Ludo.gui.main_window import MainWindow
 
 
 def test_window_defaults_and_close(application: QApplication) -> None:
+    """Verify configured window defaults, visibility, and closing.
+
+    Args:
+        application: The shared QApplication fixture used to process
+            GUI events.
+    """
     window = MainWindow()
     try:
         assert window.windowTitle() == APP_CONFIG.title
@@ -34,6 +40,12 @@ def test_window_defaults_and_close(application: QApplication) -> None:
 
 
 def test_board_resizes_and_paints(application: QApplication) -> None:
+    """Verify that resizing expands the board and preserves its painting.
+
+    Args:
+        application: The shared QApplication fixture used to process
+            GUI events.
+    """
     window = MainWindow()
     try:
         window.show()
@@ -61,26 +73,43 @@ def test_board_resizes_and_paints(application: QApplication) -> None:
         window.close()
 
 
-@pytest.mark.parametrize("entry_point", ["script", "module"])
+@pytest.mark.parametrize("entry_point", ["console", "module"])
 def test_entry_point_runs_event_loop_and_exits(entry_point: str) -> None:
-    """Launch each documented entry point in a fresh Qt process."""
+    """Verify startup and clean shutdown in a fresh Qt process.
+
+    Args:
+        entry_point: The parametrized launch mode: console or module.
+    """
     runner = f"""
 import runpy
+from importlib.metadata import distribution
 from PySide6.QtCore import QTimer
-import src.application
+import Ludo.application
 
-create_application = src.application.create_application
+create_application = Ludo.application.create_application
 
 def create_with_shutdown(argv):
+    '''Create a Qt application with a timed window shutdown.
+
+    Args:
+        argv: Command-line arguments passed to the application factory.
+
+    Returns:
+        The QApplication scheduled to close its windows after 100 ms.
+    '''
     app = create_application(argv)
     QTimer.singleShot(100, app.closeAllWindows)
     return app
 
-src.application.create_application = create_with_shutdown
-if {entry_point!r} == 'script':
-    runpy.run_path('main.py', run_name='__main__')
+Ludo.application.create_application = create_with_shutdown
+if {entry_point!r} == 'console':
+    command = next(
+        item for item in distribution('ludo-desktop').entry_points
+        if item.group == 'console_scripts' and item.name == 'ludo'
+    )
+    raise SystemExit(command.load()())
 else:
-    runpy.run_module('src.main', run_name='__main__')
+    runpy.run_module('Ludo.main', run_name='__main__')
 """
     result = subprocess.run(
         [sys.executable, "-c", runner],

@@ -2,14 +2,15 @@
 
 from PySide6.QtWidgets import QLabel, QMainWindow, QVBoxLayout, QWidget
 
-from src.config import APP_CONFIG
-from src.gui.board_widget import BoardWidget
+from Ludo.config import APP_CONFIG
+from Ludo.gui.board_widget import BoardWidget
 
 
 class MainWindow(QMainWindow):
     """Application shell with a dedicated, expanding board area."""
 
     def __init__(self) -> None:
+        """Build the main window, labels, board area, and status bar."""
         super().__init__()
         self.setWindowTitle(APP_CONFIG.title)
         self.resize(APP_CONFIG.width, APP_CONFIG.height)

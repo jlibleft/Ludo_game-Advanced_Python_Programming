@@ -11,8 +11,10 @@ requires-python = ">=3.11"
 dependencies = ["PySide6>=6.8,<7"]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.4.1,<10"]
 build = ["pyinstaller>=6.11,<7"]
+
+[dependency-groups]
+dev = ["pytest>=8.4.1,<10", "ruff>=0.14,<1"]
 
 [project.scripts]
 ludo = "Ludo.main:main"
@@ -20,3 +22,36 @@ ludo = "Ludo.main:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["Ludo", "Ludo.*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+cache_dir = ".cache/pytest"
+
+[tool.coverage.run]
+data_file = ".cache/coverage/.coverage"
+
+[tool.coverage.html]
+directory = ".cache/coverage/html"
+
+[tool.coverage.xml]
+output = ".cache/coverage/coverage.xml"
+
+[tool.coverage.json]
+output = ".cache/coverage/coverage.json"
+
+[tool.ruff]
+cache-dir = ".cache/ruff"
+target-version = "py311"
+line-length = 79
+src = ["src"]
+extend-exclude = [".cache"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.uv]
+cache-dir = ".cache/uv"

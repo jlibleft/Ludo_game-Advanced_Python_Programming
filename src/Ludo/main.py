@@ -8,7 +8,15 @@ from Ludo.gui.main_window import MainWindow
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """Show the main window and return Qt's event-loop exit code."""
+    """Show the desktop window and run the Qt event loop.
+
+    Args:
+        argv: Command-line arguments, including the program name. Uses
+            sys.argv when None.
+
+    Returns:
+        The Qt event-loop exit code, normally 0 on successful shutdown.
+    """
     application = create_application(sys.argv if argv is None else argv)
     window = MainWindow()
     window.show()

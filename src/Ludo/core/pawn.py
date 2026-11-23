@@ -14,6 +14,7 @@ class Pawn:
     progress: int = Board.BASE
 
     def __post_init__(self) -> None:
+        """Validate the initialized pawn ID and logical progress."""
         if (
             type(self.id) is not int
             or not 0 <= self.id < Board.PAWNS_PER_PLAYER
@@ -23,8 +24,18 @@ class Pawn:
 
     @property
     def in_base(self) -> bool:
+        """Check whether the pawn is in its home base.
+
+        Returns:
+            True when progress is -1; otherwise False.
+        """
         return self.progress == Board.BASE
 
     @property
     def finished(self) -> bool:
+        """Check whether the pawn has reached the finish.
+
+        Returns:
+            True when progress is 57; otherwise False.
+        """
         return self.progress == Board.FINISH
