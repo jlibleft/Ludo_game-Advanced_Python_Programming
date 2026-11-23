@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=68"]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build>=0.12.23,<0.13"]
+build-backend = "uv_build"
 
 [project]
 name = "ludo-desktop"
@@ -19,9 +19,10 @@ dev = ["pytest>=8.4.1,<10", "ruff>=0.14,<1"]
 [project.scripts]
 ludo = "Ludo.main:main"
 
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["Ludo", "Ludo.*"]
+[tool.uv.build-backend]
+module-name = "Ludo"
+module-root = "src"
+source-include = ["tests/**", "tools/**", "uv.lock"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -47,7 +48,21 @@ src = ["src"]
 extend-exclude = [".cache"]
 
 [tool.ruff.lint]
-select = ["E4", "E7", "E9", "F", "I"]
+select = [
+    "E4", "E7", "E9",  # Syntax and essential style checks.
+    "F", "I",         # Undefined/unused names and import sorting.
+    "B", "UP",        # Common bugs and modern Python syntax.
+    "SIM", "C4", "RET",  # Simplifications, comprehensions, and returns.
+    "N", "A", "SLF",  # Naming, builtin shadowing, and private access.
+    "D", "ANN",       # Docstrings and type annotations.
+    "PT", "RUF",      # pytest conventions and Ruff-specific checks.
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"src/Ludo/**/__init__.py" = ["D104", "N999"]
 
 [tool.ruff.format]
 quote-style = "double"

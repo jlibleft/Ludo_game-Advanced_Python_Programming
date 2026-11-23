@@ -2,6 +2,8 @@
 
 from dataclasses import dataclass
 
+__all__ = ("APP_CONFIG", "ApplicationConfig")
+
 
 @dataclass(frozen=True)
 class ApplicationConfig:

@@ -4,16 +4,20 @@ from dataclasses import FrozenInstanceError, replace
 
 import pytest
 
-from Ludo.core import Board, GameEngine, GameState, Pawn, Player, PlayerColor
+from Ludo.core.board import Board
 from Ludo.core.exceptions import (
     InvalidMoveError,
     InvalidRollError,
     InvalidSetupError,
 )
+from Ludo.core.game import GameEngine
+from Ludo.core.pawn import Pawn
+from Ludo.core.player import Player, PlayerColor
+from Ludo.core.state import GameState
 
 
 @pytest.mark.parametrize(
-    "progress, offset, expected",
+    ("progress", "offset", "expected"),
     [
         (0, 0, 0),
         (0, 13, 13),
@@ -138,7 +142,9 @@ def test_winner_flag_requires_four_finished_pawns_and_a_closed_turn() -> None:
     blue = Player(PlayerColor.BLUE)
     with pytest.raises(InvalidSetupError):
         GameState((red, blue), winner=PlayerColor.RED)
-    winner = replace(red, pawns=tuple(Pawn(i, 57) for i in range(4)))
+    winner = replace(
+        red, pawns=tuple(Pawn(pawn_id, 57) for pawn_id in range(4))
+    )
     with pytest.raises(InvalidSetupError):
         GameState((winner, blue))
     with pytest.raises(InvalidSetupError):
@@ -153,7 +159,7 @@ def test_winner_flag_requires_four_finished_pawns_and_a_closed_turn() -> None:
 
 def test_snapshot_rejects_multiple_winners() -> None:
     """Verify that snapshots cannot declare more than one winner."""
-    pawns = tuple(Pawn(i, 57) for i in range(4))
+    pawns = tuple(Pawn(pawn_id, 57) for pawn_id in range(4))
     players = (Player(PlayerColor.RED, pawns), Player(PlayerColor.BLUE, pawns))
     with pytest.raises(InvalidSetupError):
         GameState(players, winner=PlayerColor.RED)

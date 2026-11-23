@@ -37,10 +37,30 @@ uv run --locked ruff check .
 uv run --locked ruff format --check .
 ```
 
-[Ruff](https://docs.astral.sh/ruff/configuration/) checks common Python errors
-and import ordering. It also formats code
-using double quotes, spaces, and a 79-character line length, targeting Python
-3.11. Generated files under `.cache` are excluded.
+[Ruff](https://docs.astral.sh/ruff/configuration/) checks more than formatting.
+The selected rule families are:
+
+| Rules | What they check |
+| --- | --- |
+| `E4`, `E7`, `E9`, `F` | Essential style, invalid syntax, undefined and unused names |
+| `I` | Import ordering |
+| `B` | Common bugs and suspicious constructs |
+| `UP` | Modern syntax supported by Python 3.11 |
+| `SIM`, `C4`, `RET` | Simplifications, comprehensions, and return statements |
+| `N`, `A` | Naming conventions and shadowing Python builtins |
+| `SLF` | Access to another object's private members |
+| `D`, `ANN` | Google-style docstrings and function type annotations |
+| `PT` | Consistent pytest usage |
+| `RUF` | Additional Ruff-specific checks |
+
+The formatter uses double quotes, spaces, and a 79-character line length.
+Generated files under `.cache` are excluded. Narrow naming exceptions preserve
+the existing `Ludo` package path and Qt's required `sizeHint`/`paintEvent` names.
+Empty package markers do not require package docstrings.
+
+Ruff checks naming conventions, but meaningful names still need human review.
+Use descriptive names such as `lower_bound`, `upper_bound`, and `pawn_id`
+rather than single letters.
 
 Apply supported lint fixes and formatting with:
 
@@ -70,9 +90,7 @@ Generated files have one ignored home: `.cache/`.
 ├── pytest/       # pytest cache
 ├── pip/          # Cache for optional direct pip usage
 ├── uv/           # uv download and build cache
-├── packaging/    # setuptools .egg-info metadata
-├── build/        # setuptools intermediate build files
-├── wheels/       # Wheel output when using the command below
+├── dist/         # Source archives and wheels built with the command below
 ├── coverage/     # Coverage data and reports, if coverage is used
 └── ruff/         # Ruff cache
 ```
@@ -89,13 +107,21 @@ same configuration. A different interpreter needs its own configuration, or
 the `PYTHONPYCACHEPREFIX` environment variable pointing to `.cache/python`.
 
 The pytest, Ruff, uv, and optional coverage paths are configured in
-`pyproject.toml`. `setup.py` routes setuptools metadata and intermediate files
-into `.cache` while keeping package metadata in `pyproject.toml`. Choose an
-output directory explicitly for tools that accept one, for example:
+`pyproject.toml`. Package builds use the
+[uv build backend](https://docs.astral.sh/uv/concepts/build-backend/), declared
+in `[build-system]`; there is no `setup.py` or setuptools customization.
+The backend's module configuration preserves the `src/Ludo` layout.
+Choose an output directory explicitly for tools that accept one, for example:
 
 ```bash
-uv build --wheel --out-dir .cache/wheels
+uv build --out-dir .cache/dist
 ```
+
+This builds a Python source archive and wheel, not a standalone desktop
+executable. uv keeps build work in its cache. Source distributions include
+tests, the cache configuration helper, and the lockfile; generated cache and
+environment directories are excluded. Old `.cache/packaging` or `.cache/build`
+folders from earlier setuptools builds can be deleted.
 
 The entire `.cache` directory is disposable; tools recreate what they need.
 The virtual environment remains in `.venv`, and Git/editor settings retain
@@ -108,7 +134,6 @@ than disposable tool caches.
 .
 ├── pyproject.toml        # Metadata, dependencies, packaging, pytest config
 ├── uv.lock               # Exact dependency versions; commit this file
-├── setup.py              # Setuptools generated-file locations
 ├── tools/
 │   └── configure_cache.py # One-time cache configuration for the project venv
 ├── .cache/               # Generated files; ignored by Git
@@ -116,12 +141,12 @@ than disposable tool caches.
 ├── .gitignore
 ├── src/
 │   └── Ludo/               # Main module
-│       ├── __init__.py
+│       ├── __init__.py         # Empty package marker
 │       ├── main.py             # Startup, window lifetime, Qt event loop
 │       ├── application.py      # QApplication creation and application styling
 │       ├── config.py           # Qt-independent application configuration
 │       ├── core/
-│       │   ├── __init__.py
+│       │   ├── __init__.py     # Empty package marker
 │       │   ├── board.py        # Logical routes, safe squares, move destinations
 │       │   ├── dice.py         # Dice with an injectable random source
 │       │   ├── exceptions.py   # Domain errors for invalid operations
@@ -130,12 +155,12 @@ than disposable tool caches.
 │       │   ├── player.py       # Colors, starting offsets, and pawn ownership
 │       │   └── state.py        # Validated immutable game snapshot
 │       ├── gui/
-│       │   ├── __init__.py
+│       │   ├── __init__.py     # Empty package marker
 │       │   ├── main_window.py  # Window and layout
 │       │   ├── board_widget.py # QPainter board surface
 │       │   └── styles.py       # Shared Qt stylesheet
 │       └── ai/
-│           └── __init__.py     # Reserved for future opponents
+│           └── __init__.py     # Empty marker; opponents are a future stage
 ├── assets/
 │   ├── images/.gitkeep
 │   ├── sounds/.gitkeep
@@ -150,6 +175,10 @@ than disposable tool caches.
 
 ## Game engine
 
+- Package `__init__.py` files are empty. Import directly from the module
+  defining a class, for example `from Ludo.core.game import GameEngine` or
+  `from Ludo.core.player import PlayerColor`. Importing `Ludo.core` by itself
+  does not load the engine or Qt.
 - `GameEngine` owns the current snapshot and orchestrates rolls, legal moves,
   captures, automatic turn changes, bonus rolls, victory, and reset.
 - `GameState`, `Player`, and `Pawn` are frozen dataclasses. Rosters and pawn
@@ -158,10 +187,32 @@ than disposable tool caches.
 - `Board` centralizes logical destinations and shared-track coordinate mapping.
   It contains no graphical geometry. Legal-move discovery and actual moves
   use the same destination calculation.
-- `Dice` accepts a `RandomSource` with `randint(a, b)`. By default it uses its
-  own `random.Random`; tests can inject a seeded or scripted source.
+- `Dice` accepts a `RandomSource` with
+  `randint(lower_bound, upper_bound, /)`. The `/` declares positional-only
+  bounds, allowing generators such as `random.Random` to use their own
+  parameter names. By default Dice creates its own random generator; tests
+  can inject one with `Dice(random_source=source)`.
 - `exceptions.py` defines `GameError` and specific errors for invalid setup,
   moves, rolls, turn phases, and actions after victory.
+
+### Public and internal names
+
+Each implementation module declares a tuple named `__all__` listing its
+intended public names. For example, `Ludo.core.dice` exposes `Dice` and
+`RandomSource`. Use explicit imports instead of wildcard imports.
+
+A single leading underscore marks an internal detail: `GameEngine._state`,
+`Dice._random_source`, validation helpers, and test-only helpers. External
+callers should use `engine.state`, `engine.active_player`, and the public
+roll/move methods. Internal winner-validation data is private; the public
+`winner` field/property reports the actual winner.
+
+These conventions are not enforced access permissions: `__all__` controls
+wildcard exports, and `_name` asks callers to treat a name as internal.
+Frozen dataclasses, tuple collections, and read-only engine properties prevent
+ordinary direct mutation of the live game snapshot. Double-leading-underscore
+name mangling is unnecessary here. Player colors use Python 3.11's `StrEnum`,
+whose string values are the lowercase color names.
 
 ### Coordinates and rules
 

@@ -15,6 +15,8 @@ from Ludo.core.pawn import Pawn
 from Ludo.core.player import Player, PlayerColor
 from Ludo.core.state import GameState
 
+__all__ = ("Game", "GameEngine")
+
 
 class GameEngine:
     """Own a game snapshot and accept only valid roll/move operations."""

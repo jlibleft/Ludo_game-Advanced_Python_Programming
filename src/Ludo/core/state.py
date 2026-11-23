@@ -7,6 +7,8 @@ from Ludo.core.board import Board
 from Ludo.core.exceptions import InvalidSetupError
 from Ludo.core.player import Player, PlayerColor
 
+__all__ = ("GameState",)
+
 
 @dataclass(frozen=True, slots=True)
 class GameState:
@@ -26,7 +28,7 @@ class GameState:
         self._validate_active_player_index()
         self._validate_player_colors()
         self._validate_pending_roll()
-        self._validate_winner_state(self.winners)
+        self._validate_winner_state(self._finished_player_colors)
         self._validate_occupancy()
 
     @property
@@ -39,7 +41,7 @@ class GameState:
         return self.players[self.active_player_index]
 
     @property
-    def winners(self) -> tuple[PlayerColor, ...]:
+    def _finished_player_colors(self) -> tuple[PlayerColor, ...]:
         """Find players whose four pawns have all finished.
 
         Returns:

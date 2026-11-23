@@ -4,6 +4,8 @@ from PySide6.QtCore import QRectF, QSize, Qt
 from PySide6.QtGui import QColor, QFont, QPainter, QPaintEvent, QPen
 from PySide6.QtWidgets import QSizePolicy, QWidget
 
+__all__ = ("BoardWidget",)
+
 
 class BoardWidget(QWidget):
     """Draw a responsive placeholder without board geometry or game rules."""
@@ -22,7 +24,7 @@ class BoardWidget(QWidget):
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
         )
 
-    def sizeHint(self) -> QSize:
+    def sizeHint(self) -> QSize:  # noqa: N802 - Qt override name.
         """Suggest a square size to the parent layout.
 
         Returns:
@@ -31,7 +33,7 @@ class BoardWidget(QWidget):
         """
         return QSize(640, 640)
 
-    def paintEvent(self, event: QPaintEvent) -> None:
+    def paintEvent(self, event: QPaintEvent) -> None:  # noqa: N802 - Qt override.
         """Paint a centered square placeholder and its labels.
 
         Args:

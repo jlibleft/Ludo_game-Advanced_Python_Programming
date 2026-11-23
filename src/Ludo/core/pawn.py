@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from Ludo.core.board import Board
 from Ludo.core.exceptions import InvalidSetupError
 
+__all__ = ("Pawn",)
+
 
 @dataclass(frozen=True, slots=True)
 class Pawn:

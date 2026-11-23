@@ -5,6 +5,8 @@ from PySide6.QtWidgets import QLabel, QMainWindow, QVBoxLayout, QWidget
 from Ludo.config import APP_CONFIG
 from Ludo.gui.board_widget import BoardWidget
 
+__all__ = ("MainWindow",)
+
 
 class MainWindow(QMainWindow):
     """Application shell with a dedicated, expanding board area."""

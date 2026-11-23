@@ -5,7 +5,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from Ludo.core import Dice
+from Ludo.core.dice import Dice
 from Ludo.core.exceptions import InvalidRollError
 
 
@@ -22,7 +22,7 @@ def test_dice_uses_inclusive_bounds_from_the_injected_source() -> None:
     """Verify that Dice requests inclusive bounds from its random source."""
     source = Mock()
     source.randint.side_effect = [6, 1, 4]
-    dice = Dice(source)
+    dice = Dice(random_source=source)
     assert [dice.roll() for _ in range(3)] == [6, 1, 4]
     assert source.randint.call_count == 3
     source.randint.assert_called_with(1, 6)

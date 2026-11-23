@@ -7,6 +7,8 @@ from PySide6.QtWidgets import QApplication
 from Ludo.config import APP_CONFIG
 from Ludo.gui.styles import APPLICATION_STYLE
 
+__all__ = ("create_application",)
+
 
 def create_application(argv: Sequence[str]) -> QApplication:
     """Create and configure the process's single QApplication.

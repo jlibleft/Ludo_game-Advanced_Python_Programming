@@ -1,14 +1,16 @@
 """Player colors, fixed track offsets, and immutable pawn ownership."""
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 
 from Ludo.core.board import Board
 from Ludo.core.exceptions import InvalidSetupError
 from Ludo.core.pawn import Pawn
 
+__all__ = ("Player", "PlayerColor")
 
-class PlayerColor(str, Enum):
+
+class PlayerColor(StrEnum):
     """Color order fixes starting offsets independently of roster order."""
 
     RED = "red"

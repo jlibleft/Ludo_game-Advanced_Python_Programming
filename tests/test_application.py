@@ -65,10 +65,14 @@ def test_board_resizes_and_paints(application: QApplication) -> None:
             image = board.grab().toImage()
             assert not image.isNull()
             # The white board surface and colored markers exercise QPainter.
-            x = image.width() // 2
-            y = image.height() // 2
-            assert image.pixelColor(x, y - 80) == QColor("#ffffff")
-            assert image.pixelColor(x - 39, y - 36) == QColor("#e76b72")
+            center_x = image.width() // 2
+            center_y = image.height() // 2
+            assert image.pixelColor(center_x, center_y - 80) == QColor(
+                "#ffffff"
+            )
+            assert image.pixelColor(center_x - 39, center_y - 36) == QColor(
+                "#e76b72"
+            )
     finally:
         window.close()
 

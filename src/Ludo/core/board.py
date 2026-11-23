@@ -2,6 +2,8 @@
 
 from Ludo.core.exceptions import InvalidMoveError, InvalidRollError
 
+__all__ = ("Board",)
+
 
 class Board:
     """Translate player-relative progress into shared board coordinates."""

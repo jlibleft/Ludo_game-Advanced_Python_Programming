@@ -1,1 +1,0 @@
-"""Ludo desktop application package."""

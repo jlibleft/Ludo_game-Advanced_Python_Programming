@@ -6,6 +6,8 @@ from collections.abc import Sequence
 from Ludo.application import create_application
 from Ludo.gui.main_window import MainWindow
 
+__all__ = ("main",)
+
 
 def main(argv: Sequence[str] | None = None) -> int:
     """Show the desktop window and run the Qt event loop.

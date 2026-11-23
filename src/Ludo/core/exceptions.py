@@ -1,5 +1,14 @@
 """Domain errors callers can handle without depending on Qt."""
 
+__all__ = (
+    "GameError",
+    "GameOverError",
+    "InvalidMoveError",
+    "InvalidRollError",
+    "InvalidSetupError",
+    "InvalidTurnError",
+)
+
 
 class GameError(Exception):
     """Base exception for invalid Ludo operations."""

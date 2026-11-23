@@ -1,5 +1,7 @@
 """Shared visual styling for the desktop interface."""
 
+__all__ = ("APPLICATION_STYLE",)
+
 APPLICATION_STYLE = """
 QWidget {
     color: #24334b;
