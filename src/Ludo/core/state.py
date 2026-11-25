@@ -77,9 +77,10 @@ class GameState:
 
     def _validate_active_player_index(self) -> None:
         """Require an integer index identifying a player in the roster."""
-        if type(
-            self.active_player_index
-        ) is not int or not 0 <= self.active_player_index < len(self.players):
+        player_index = self.active_player_index
+        if type(player_index) is not int or not 0 <= player_index < len(
+            self.players
+        ):
             raise InvalidSetupError("The active player index is invalid.")
 
     def _validate_player_colors(self) -> None:

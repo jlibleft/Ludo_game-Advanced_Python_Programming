@@ -4,6 +4,7 @@ import sys
 from collections.abc import Sequence
 
 from Ludo.application import create_application
+from Ludo.core.game import GameEngine
 from Ludo.gui.main_window import MainWindow
 
 __all__ = ("main",)
@@ -20,7 +21,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         The Qt event-loop exit code, normally 0 on successful shutdown.
     """
     application = create_application(sys.argv if argv is None else argv)
-    window = MainWindow()
+    engine = GameEngine()
+    window = MainWindow(engine=engine)
     window.show()
     return application.exec()
 

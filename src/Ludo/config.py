@@ -9,7 +9,7 @@ __all__ = ("APP_CONFIG", "ApplicationConfig")
 class ApplicationConfig:
     """Default desktop window configuration."""
 
-    title: str = "Ludo Game"
+    title: str = "Ludo - Chińczyk"
     width: int = 1100
     height: int = 800
     minimum_width: int = 640

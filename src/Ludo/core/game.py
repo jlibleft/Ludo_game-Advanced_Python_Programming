@@ -21,7 +21,7 @@ __all__ = ("Game", "GameEngine")
 class GameEngine:
     """Own a game snapshot and accept only valid roll/move operations."""
 
-    MAX_DICE = 6
+    MAX_DICE = Board.MAX_DICE
 
     def __init__(
         self,
@@ -91,6 +91,15 @@ class GameEngine:
             return None
         return self.active_player
 
+    @property
+    def can_roll(self) -> bool:
+        """Report whether the current turn allows another dice roll.
+
+        Returns:
+            True before a roll when the game has no winner; otherwise False.
+        """
+        return self._state.winner is None and self._state.pending_roll is None
+
     def new_game(self, colors: Sequence[PlayerColor | str]) -> GameState:
         """Replace the roster atomically; the first listed color starts.
 
@@ -133,7 +142,7 @@ class GameEngine:
             player.
         """
         self._require_running()
-        if self._state.pending_roll is not None:
+        if not self.can_roll:
             raise InvalidTurnError("Move a pawn before rolling again.")
         roll = self._dice.roll()
         Board.validate_roll(roll)
@@ -181,13 +190,9 @@ class GameEngine:
         # Membership in legal_moves guarantees a destination exists.
         assert destination is not None
         moved_pawn = replace(pawn, progress=destination)
-        moved_player = replace(
-            self.active_player,
-            pawns=tuple(
-                moved_pawn if item.id == pawn_id else item
-                for item in self.active_player.pawns
-            ),
-        )
+        updated_pawns = list(self.active_player.pawns)
+        updated_pawns[pawn_id] = moved_pawn
+        moved_player = replace(self.active_player, pawns=tuple(updated_pawns))
         players = self._players_after_capture(moved_player, moved_pawn)
         winner = moved_player.color if moved_player.has_won else None
         state = GameState(
@@ -227,20 +232,15 @@ class GameEngine:
             elif square is None or square in Board.SAFE_SQUARES:
                 players.append(player)
             else:
-                players.append(
-                    replace(
-                        player,
-                        pawns=tuple(
-                            replace(pawn, progress=Board.BASE)
-                            if Board.shared_position(
-                                pawn.progress, player.starting_offset
-                            )
-                            == square
-                            else pawn
-                            for pawn in player.pawns
-                        ),
+                updated_pawns = []
+                for pawn in player.pawns:
+                    opponent_square = Board.shared_position(
+                        pawn.progress, player.starting_offset
                     )
-                )
+                    if opponent_square == square:
+                        pawn = replace(pawn, progress=Board.BASE)
+                    updated_pawns.append(pawn)
+                players.append(replace(player, pawns=tuple(updated_pawns)))
         return tuple(players)
 
     def _movable_pawns(self, roll: int) -> tuple[int, ...]:

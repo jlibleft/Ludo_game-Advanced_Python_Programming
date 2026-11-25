@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pytest
 from PySide6.QtCore import QSize
-from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QApplication, QSizePolicy
 
 from Ludo.config import APP_CONFIG
@@ -23,12 +22,11 @@ def test_window_defaults_and_close(application: QApplication) -> None:
     """
     window = MainWindow()
     try:
-        assert window.windowTitle() == APP_CONFIG.title
+        assert window.windowTitle() == APP_CONFIG.title == "Ludo - Chińczyk"
         assert window.size() == QSize(1100, 800)
         assert window.minimumSize().width() < window.maximumSize().width()
         assert window.minimumSize().height() < window.maximumSize().height()
-        layout = window.centralWidget().layout()
-        assert layout.indexOf(window.board_widget) >= 0
+        assert window.centralWidget().isAncestorOf(window.board_widget)
         assert application.quitOnLastWindowClosed()
         window.show()
         application.processEvents()
@@ -64,14 +62,9 @@ def test_board_resizes_and_paints(application: QApplication) -> None:
             application.processEvents()
             image = board.grab().toImage()
             assert not image.isNull()
-            # The white board surface and colored markers exercise QPainter.
-            center_x = image.width() // 2
-            center_y = image.height() // 2
-            assert image.pixelColor(center_x, center_y - 80) == QColor(
-                "#ffffff"
-            )
-            assert image.pixelColor(center_x - 39, center_y - 36) == QColor(
-                "#e76b72"
+            assert len(board.pawn_placements) == 16
+            assert board.board_geometry.side <= min(
+                board.width(), board.height()
             )
     finally:
         window.close()
