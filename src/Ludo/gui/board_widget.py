@@ -311,7 +311,7 @@ class BoardWidget(QWidget):
         row, column = geometry.BASE_ORIGINS[color]
         scale = geometry.cell_size
         base_color = QColor(PLAYER_COLORS[color])
-        frame = _grid_rect(geometry, column + 0.16, row + 0.16, 5.68, 5.68)
+        frame = _grid_rect(geometry, column + 0.08, row + 0.08, 5.68, 5.68)
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(base_color)
         painter.drawRoundedRect(frame, scale * 0.38, scale * 0.38)

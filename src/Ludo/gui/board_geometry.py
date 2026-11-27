@@ -23,6 +23,7 @@ _RED_TRACK_QUARTER: tuple[GridCell, ...] = (
     (6, 3),
     (6, 4),
     (6, 5),
+    (6, 6),
     (5, 6),
     (4, 6),
     (3, 6),
@@ -154,7 +155,13 @@ class BoardGeometry:
             {
                 color: tuple(
                     _rotate_point(point, turn)
-                    for point in ((6.0, 6.0), (7.5, 7.5), (6.0, 9.0))
+                for point in (
+                    (6.0, 7.0),
+                    (6.0, 8.0),
+                    (7.0, 8.0),
+                    (7.5, 7.5), 
+                    (7.0, 7.0),
+)
                 )
                 for turn, color in enumerate(PlayerColor)
             }
